@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+  <html>
+    <head>
+      <meta charset="UTF-8">
+      <title>Fast!</title>
+      <style>
+        .container {
+          width: 500px;
+          height: 95px;
+          background: rgba(255,255,255,0.3);
+          border-radius: 5px;
+          box-shadow: 0 0 5px 1px rgba(0,0,0,0.5);
+        }
+        .title-contaier {
+          width: 100%;
+          height: 20px;
+          border-bottom: 1px solid #cbcbcb;
+          cursor: all-scroll;
+          -webkit-app-region: drag;
+          -webkit-user-select: none;
+        }
+        .title-right-wrap {
+          float: right;
+          height: 100%;
+          display: flex;
+        }
+        .win-btn {
+          -webkit-app-region: no-drag;
+          width: 16px;
+          height: 16px;
+          margin: 1px 3px;
+          cursor: pointer;
+        }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="title-contaier">
+          <div class="title-right-wrap">
+            <div class="win-btn" id="btn_minimize">
+              <img src="./static/images/win_min.svg" width=16 height=16 alt="-">
+            </div>
+            <div class="win-btn" id="btn_close">
+              <img src="./static/images/win_close.svg" width=16 height=16 alt="X">
+            </div>
+          </div>
+        </div>
+        Hello
+      </div>
+      <script>
+        const {ipcRenderer} = require('electron')
+        document.getElementById('btn_close').onclick = function () {
+          ipcRenderer.sendSync('external.closeTaskbar')
+        }
+        document.getElementById('btn_minimize').onclick = function () {
+          ipcRenderer.sendSync('external.minimize')
+        }
+      </script>
+    </body>
+  </html>
