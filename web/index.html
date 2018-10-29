@@ -20,7 +20,6 @@
           width: 100%;
           height: 20px;
           border-bottom: 1px solid #cbcbcb;
-          cursor: all-scroll;
           -webkit-app-region: drag;
           -webkit-user-select: none;
         }
@@ -66,11 +65,11 @@
       </style>
     </head>
     <body>
-      <div id="app"></div>
+      <!-- <div id="app"></div> -->
       <div class="container">
         <div class="title-contaier">
           <div class="title-right-wrap">
-            <div class="win-btn" id="btn_minimize">
+            <div class="win-btn" id="btn_minimize" style="display: none;">
               <img src="./static/images/win_min.svg" width=16 height=16 alt="-">
             </div>
             <div class="win-btn" id="btn_close">
@@ -80,20 +79,103 @@
         </div>
         <div class="search-container">
           <div class="search-wrap">
-            <input type="text">
+            <input type="text" placeholder="请输入网页关键字或网址..." id="input">
           </div>
           <div class="btn-search">
             <img src="./static//images/system_search.svg" alt="Search">
           </div>
         </div>
       </div>
+      <script src="http://s.thsi.cn/js/jquery-1.8.3.min.js"></script>
       <script>
-        const {ipcRenderer} = require('electron')
-        document.getElementById('btn_close').onclick = function () {
-          ipcRenderer.sendSync('external.closeTaskbar')
-        }
-        document.getElementById('btn_minimize').onclick = function () {
-          ipcRenderer.sendSync('external.minimize')
+        require('./api.js')
+        const { ipcRenderer } = require('electron')
+
+        ipcRenderer.on("message", (event, text) => {
+            console.log(arguments);
+            this.tips = text;
+        });
+        //注意：“downloadProgress”事件可能存在无法触发的问题，只需要限制一下下载网速就好了
+        ipcRenderer.on("downloadProgress", (event, progressObj)=> {
+            console.log(progressObj);
+            this.downloadPercent = progressObj.percent || 0;
+        });
+        ipcRenderer.on("isUpdateNow", () => {
+            ipcRenderer.send("isUpdateNow");
+        });
+        console.log(API.use({
+          method: 'external.getChildWin'
+        }))
+        $('#btn_close, #btn_minimize').on('click', function () {
+          API.use({
+            method: 'external.hide'
+          })
+        })
+        $('#input')
+        .on('focus', function () {
+          if ($(this).val() != '') {
+            showDrop([$(this).val(), $(this).val(), $(this).val(), $(this).val()])
+          }
+        })
+        .on('blur', function () {
+          setTimeout(() => {
+            API.use({
+              method: 'external.hide.drop'
+            })
+          }, 100)
+        })
+        .on('keydown', function (e) {
+          if (e.keyCode == '13') {
+            API.use({
+              method: 'external.mainToDrop',
+              data: {methods: 'enter', datas: {val: $(this).val()}}
+            })
+            e.preventDefault()
+          } else if (e.keyCode == '38') {
+            API.use({
+              method: 'external.mainToDrop',
+              data: {methods: 'upArrow'}
+            })
+            e.preventDefault()
+          } else if (e.keyCode == '40') {
+            API.use({
+              method: 'external.mainToDrop',
+              data: {methods: 'downArrow'}
+            })
+            e.preventDefault()
+          }
+        })
+        .on('keyup', function (e) {
+          if ($(this).val() == '') {
+            API.use({
+              method: 'external.hide.drop'
+            })
+          } else if (![37, 38, 39, 40].includes(e.keyCode))  {
+            showDrop([$(this).val(), $(this).val(), $(this).val()])
+          }
+        })
+        function showDrop (arr) {
+          console.log(arr.length)
+          let rect = API.use({
+            method: 'external.getRectangle'
+          })
+          API.use({
+            method: 'external.mainToDrop',
+            data: {methods: 'setDropData', datas: arr}
+          })
+          API.use({
+            method: 'external.setWinSize.drop',
+            data: {width: 441, height: 31 * arr.length + 1}
+          })
+          API.use({
+            method: 'external.setWinPos.drop',
+            data: {x: rect.x + 17, y: rect.y + 80}
+          })
+          if ($('#input').val() != '') {
+            API.use({
+              method: 'external.show.drop'
+            })
+          }
         }
       </script>
     </body>

@@ -1,13 +1,15 @@
 const { app, BrowserWindow } = require('electron')
 const Conf = require('./configs/app')
 const shortcut = require('./system/shortcut')
+// const { autoUpdater } = require("electron-updater")
 
 // 创建主窗口
 function createMainWindow () {
   global.mainWin = new BrowserWindow({
-    width: 416,
-    height: 72,
+    width: 510, 
+    height: 105,
     maximizable: false, // 可否最大化
+    fullscreenable: false, // 是否可以进入全屏状态
     resizable: false, // 是否可调节大小
     alwaysOnTop: true, // 是否总是在所有窗口最顶部
     transparent: true, // 窗口背景是否透明
@@ -18,11 +20,11 @@ function createMainWindow () {
   })
 
   // 然后加载内部html
-  mainWin.loadFile('web/index2.html')
-
-  // 打开开发者工具
-  Conf.devtool && mainWin.webContents.openDevTools({mode: 'detach'})
+  mainWin.loadFile('web/index.html')
   
+  mainWin.on('ready-to-show', () => {
+    mainWin.focus()
+  })
   // 当 window 被关闭，这个事件会被触发。
   mainWin.on('closed', () => {
     // 取消引用 window 对象，如果你的应用支持多窗口的话，
@@ -30,9 +32,32 @@ function createMainWindow () {
     // 与此同时，你应该删除相应的元素。
     mainWin = null
   })
+  mainWin.on('move', () => {
+    // 拖动窗口时需要隐藏下拉框
+    mainDropWin.hide()
+  })
 
-  require('./ipc/index')
+  global.mainDropWin = new BrowserWindow({
+    parent: mainWin,
+    maximizable: false, // 可否最大化
+    fullscreenable: false, // 是否可以进入全屏状态
+    // resizable: false, // 是否可调节大小
+    alwaysOnTop: true, // 是否总是在所有窗口最顶部
+    // transparent: true, // 窗口背景是否透明
+    skipTaskbar: true, // 在任务栏是否显示
+    frame: false, // 是否有边框
+    show: false, // 是否启动时就显示
+    // modal: true, // 是否为模态窗口
+  })
+  mainDropWin.loadFile('web/drop.html')
+
+  // 打开开发者工具
+  Conf.devtool && mainWin.webContents.openDevTools({mode: 'detach'})
+
+  require('./ipc/index').init(mainWin)
   require('./system/base')
+
+  // updateHandle()
 }
 
 // 防止重复开启应用
@@ -87,3 +112,53 @@ app.on('activate', () => {
     createWindow()
   }
 })
+
+// function updateHandle() {
+//   let message = {
+//     error: '检查更新出错',
+//     checking: '正在检查更新……',
+//     updateAva: '检测到新版本，正在下载……',
+//     updateNotAva: '现在使用的就是最新版本，不用更新',
+//   }
+//   const os = require('os')
+
+//   autoUpdater.setFeedURL('http://www.baidu.com')
+//   autoUpdater.on('error', function (error) {
+//     sendUpdateMessage(message.error)
+//   })
+//   autoUpdater.on('checking-for-update', function () {
+//     sendUpdateMessage(message.checking)
+//   })
+//   autoUpdater.on('update-available', function (info) {
+//     sendUpdateMessage(message.updateAva)
+//   })
+//   autoUpdater.on('update-not-available', function (info) {
+//     sendUpdateMessage(message.updateNotAva)
+//   })
+
+//   // 更新下载进度事件
+//   autoUpdater.on('download-progress', function (progressObj) {
+//     mainWin.webContents.send('downloadProgress', progressObj)
+//   })
+//   autoUpdater.on('update-downloaded', function (event, releaseNotes, releaseName, releaseDate, updateUrl, quitAndUpdate) {
+
+//     ipcMain.on('isUpdateNow', (e, arg) => {
+//       console.log(arguments)
+//       console.log("开始更新")
+//       //some code here to handle event
+//       autoUpdater.quitAndInstall()
+//     })
+
+//     mainWin.webContents.send('isUpdateNow')
+//   })
+
+//   ipcMain.on("checkForUpdate",() => {
+//       //执行自动更新检查
+//       autoUpdater.checkForUpdates()
+//   })
+// }
+
+// // 通过main进程发送事件给renderer进程，提示更新信息
+// function sendUpdateMessage(text) {
+//   mainWin.webContents.send('message', text)
+// }

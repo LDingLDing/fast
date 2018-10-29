@@ -1,15 +1,23 @@
 {
-  "name": "fast",
+  "name": "faster",
+  "productName": "faster",
   "version": "1.0.0",
-  "description": "",
+  "author": "b2c",
+  "description": "faster",
   "main": "index.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "package": "electron-packager . faster --win --out ./packager --arch=x64 --electronVersion=1.0.0 --overwrite --ignore=node_modules",
+    "build": "electron-builder --win"
   },
   "keywords": [],
-  "author": "",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^3.0.4"
+    "electron": "^3.0.4",
+    "electron-builder": "^20.28.4",
+    "electron-packager": "^12.2.0",
+    "electron-squirrel-startup": "^1.0.0",
+    "electron-updater": "^3.1.5",
+    "regedit": "^3.0.0"
   }
 }

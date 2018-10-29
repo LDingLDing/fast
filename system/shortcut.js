@@ -10,6 +10,7 @@ exports = module.exports = {
     var ret = globalShortcut.register('alt+x', function() {
       if (mainWin.isVisible()) {
         mainWin.hide()
+        mainDropWin.hide()
       } else {
         mainWin.show()
         mainWin.focus()

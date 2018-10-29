@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Fast!</title>
+    <style>
+      html,body,div,p{padding:0;margin:0;}
+      body,input,textarea,select,button {font-family: 'microsoft yahei', sans-serif; font-size: 14px;}
+      input {outline: none;}
+      input {border: none; padding: none;}
+      .container {
+        background: rgba(255,255,255,0.3);
+        border: 1px solid #c0c0c0;
+      }
+      .container p{
+        height: 30px;
+        line-height: 30px;
+        padding-left: 5px;
+        border-bottom: 1px solid #c0c0c0;
+      }
+      .container p.hover{
+        background: #ddd;
+      }
+      .container p:last-child{
+        border: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container" id="container"></div>
+    <script src="http://s.thsi.cn/js/jquery-1.8.3.min.js"></script>
+    <script>
+      // require('./api.js')
+      const {ipcRenderer} = require('electron')
+      // 设置下拉框数据
+      ipcRenderer.on('setDropData', (event, data) => {
+        let html = ''
+        for (let i in data) {
+          html += '<p>' + data[i] + i + '</p>'
+        }
+        $('#container').html(html)
+      })
+      ipcRenderer.on('enter', (event, data) => {
+        if ($('.hover').length === 0) {
+          alert(data.val)
+        } else {
+          alert($('#container').find('.hover').html())
+        }
+      })
+      ipcRenderer.on('upArrow', (event) => {
+        if ($('.hover').length != 0) {
+          let index = $('#container').find('.hover').index()
+          if (index != 0) {
+            $('#container').find('.hover').removeClass('hover')
+            $('#container').find('p').eq(index - 1).addClass('hover')
+          }
+        }
+      })
+      ipcRenderer.on('downArrow', (event) => {
+        if ($('.hover').length === 0) {
+          $('#container').find('p').eq(0).addClass('hover')
+        } else {
+          let index = $('#container').find('.hover').index()
+          if (index != $('#container').find('p').length - 1) {
+            $('#container').find('.hover').removeClass('hover')
+            $('#container').find('p').eq(index + 1).addClass('hover')
+          }
+        }
+      })
+      $(function () {
+        $('#container')
+        .on('mouseenter', 'p', function () {
+          $(this).addClass('hover')
+        })
+        .on('mouseleave', 'p', function () {
+          $(this).removeClass('hover')
+        })
+        .on('click', 'p', function () {
+          alert($(this).html())
+        })
+      })
+    </script>
+  </body>
+</html>
