@@ -12,7 +12,7 @@ function createMainWindow () {
     fullscreenable: false, // 是否可以进入全屏状态
     resizable: false, // 是否可调节大小
     alwaysOnTop: true, // 是否总是在所有窗口最顶部
-    transparent: true, // 窗口背景是否透明
+    // transparent: true, // 窗口背景是否透明
     skipTaskbar: true, // 在任务栏是否显示
     frame: false, // 是否有边框
     show: false, // 是否启动时就显示
@@ -52,7 +52,7 @@ function createMainWindow () {
   mainDropWin.loadFile('web/drop.html')
 
   // 打开开发者工具
-  Conf.devtool && mainWin.webContents.openDevTools({mode: 'detach'})
+  // Conf.devtool && mainWin.webContents.openDevTools({mode: 'detach'})
 
   require('./ipc/index').init(mainWin)
   require('./system/base')
@@ -84,6 +84,19 @@ if (!gotTheLock) {
     require('./system/tray')
   })
 }
+
+const shouldQuit = app.makeSingleInstance((commandLine, workingDirectory) => {
+  if (mainWindow) {
+    if (mainWindow.isMinimized()) {
+      mainWindow.restore()
+    }
+    mainWindow.focus()
+  }
+})
+if (shouldQuit) {
+  app.quit()
+}
+
 
 app.on('open-url', function(event) {
   shell.openExternal(url)

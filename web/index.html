@@ -82,7 +82,7 @@
             <input type="text" placeholder="请输入网页关键字或网址..." id="input">
           </div>
           <div class="btn-search">
-            <img src="./static//images/system_search.svg" alt="Search">
+            <img src="./static//images/system_search.svg" alt="Search" id="search">
           </div>
         </div>
       </div>
@@ -153,6 +153,9 @@
           } else if (![37, 38, 39, 40].includes(e.keyCode))  {
             showDrop([$(this).val(), $(this).val(), $(this).val()])
           }
+        })
+        $('#search').on('click', function () {
+          alert($(this).val())
         })
         function showDrop (arr) {
           console.log(arr.length)
